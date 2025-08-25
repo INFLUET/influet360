@@ -1,4 +1,4 @@
-import clientPromise from "@/lib/mongodb"; // again using your file
+import clientPromise from "@/lib/mongodb";
 
 export default async function handler(req, res) {
   if (req.method !== "POST") return res.status(405).end();
@@ -8,7 +8,10 @@ export default async function handler(req, res) {
   const client = await clientPromise;
   const db = client.db();
 
-  const record = await db.collection("otps").findOne({ email });
+  // 🔥 Fetch the latest OTP record
+  const record = await db
+    .collection("otps")
+    .findOne({ email }, { sort: { createdAt: -1 } });
 
   if (!record) {
     return res.status(400).json({ verified: false, error: "OTP not found" });
@@ -16,7 +19,8 @@ export default async function handler(req, res) {
 
   const now = new Date();
 
-  if (record.otp !== otp) {
+  // Compare safely as strings
+  if (String(record.otp).trim() !== String(otp).trim()) {
     return res.status(400).json({ verified: false, error: "Invalid OTP" });
   }
 
@@ -24,6 +28,7 @@ export default async function handler(req, res) {
     return res.status(400).json({ verified: false, error: "OTP expired" });
   }
 
+  // ✅ Remove OTP after successful verification
   await db.collection("otps").deleteOne({ email });
 
   return res.status(200).json({ verified: true });

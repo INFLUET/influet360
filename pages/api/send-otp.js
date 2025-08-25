@@ -1,5 +1,5 @@
 import nodemailer from "nodemailer";
-import clientPromise from "@/lib/mongodb"; // use your existing mongodb.js
+import clientPromise from "@/lib/mongodb";
 
 export default async function handler(req, res) {
   if (req.method !== "POST") return res.status(405).end();
@@ -11,12 +11,23 @@ export default async function handler(req, res) {
   }
 
   const otp = Math.floor(100000 + Math.random() * 900000).toString();
-  const expiresAt = new Date(Date.now() + 3 * 60 * 1000); // 3 minutes expiry
+  const expiresAt = new Date(Date.now() + 3 * 60 * 1000); // 3 mins expiry
 
   const client = await clientPromise;
   const db = client.db();
 
-  await db.collection("otps").insertOne({ email, otp, expiresAt });
+  // 🔥 Save OTP (replace old one if exists)
+  await db.collection("otps").updateOne(
+    { email },
+    {
+      $set: {
+        otp: String(otp),
+        expiresAt,
+        createdAt: new Date(),
+      },
+    },
+    { upsert: true }
+  );
 
   const transporter = nodemailer.createTransport({
     service: "gmail",

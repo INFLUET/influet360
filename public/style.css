@@ -433,15 +433,16 @@ body {
 }
 
 /* Portfolio */
-
 .section_container{
     font-family: 'Poppins', sans-serif;
     background-color: #cffc2c;
     max-width: 1000px;
     margin: auto;
     text-align: center;
+
     transform: scale(0.95);
     transform-origin: top center;
+
     padding: 1rem 0.5rem;
 }
 
@@ -451,7 +452,7 @@ body {
     font-weight: 600;
     color: #0f172e;
     margin-top: 85px;
-    margin-bottom: 1.4rem;
+    margin-bottom: 1.5rem;
 }
 
 .section_container h1::after{
